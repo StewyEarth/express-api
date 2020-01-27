@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+var app = require("../app");
+var http = require("http");
+
+var server = http.createServer(app);
+
+server.listen(1337);
+
+server.on("error", errorHandler);
+server.on("listening", listenHandler);
+
+function errorHandler(error) {
+	console.error(error);
+	process.exit(1);
+}
+
+function listenHandler() {
+	console.info("Server is running on port", server.address().port);
+}
