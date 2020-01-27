@@ -1,10 +1,11 @@
 #!/usr/bin/env node
+require("dotenv").config()
 var app = require("../app");
 var http = require("http");
 
 var server = http.createServer(app);
 
-server.listen(1337);
+server.listen(process.env.PORT || 1337);
 
 server.on("error", errorHandler);
 server.on("listening", listenHandler);

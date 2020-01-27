@@ -1,0 +1,8 @@
+{
+    "development": {
+        "force": true
+    },
+    "production": {
+        "force": false
+    }
+}
