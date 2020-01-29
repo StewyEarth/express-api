@@ -33,7 +33,7 @@ async function authenticateUser(email,password) {
             return Promise.reject("Email or password incorrect")
         }
         let userObject = { user: user.email }
-        let token = jwt.sign(userObject, process.env.JWT_SECRET)
+        let token = generateToken(userObject)
         return token;
     } catch (error) {
         console.error(error)
@@ -45,17 +45,33 @@ async function refreshToken(req,res,next){
         res.status(400).end();
         return;
     }
-    if(!cache.get(req.fields.refreshToken)){
-        res.status(400).end();
+    let email = cache.get(req.fields.refreshToken);
+    cache.del(req.fields.refreshToken)
+    if(!email){
+        res.status(404).end();
         return
     }
-    let result = cache.get(req.fields.refreshToken)
-    let userObject = { user: result }
-    let token = jwt.sign(userObject, process.env.JWT_SECRET)
+    let user = await User.findOne({
+        where:{
+            email
+        }
+    })
+    if(!user){
+        res.status(404).end();
+        return;
+    }
+
+    let userObject = { user: user.email }
+    let token = generateToken(userObject)
     let refreshToken = uuid();
-    cache.put(refreshToken, req.fields.email);
-    cache.del(req.fields.refreshToken)
+    cache.put(refreshToken, user.email);
     res.json({token,refreshToken})
+}
+function generateToken(userObject, exp = "300s"){
+    let token = jwt.sign({
+        data: userObject,
+    },process.env.JWT_SECRET,{expiresIn: exp})
+    return token
 }
 
 module.exports = {
